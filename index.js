@@ -33,14 +33,24 @@ async function run() {
 
 		// Get API of Class Collection
 		app.get("/class", async (req, res) => {
-			const result = await classCollection.find().toArray();
-			res.send(result)
+			const limit = 6;
+			const query = { enrolled: { $gt: 0 } };
+			const options = {
+				sort: {
+					enrolled: -1,
+				},
+			};
+			const result = await classCollection
+				.find(query, options)
+				.limit(limit)
+				.toArray();
+			res.send(result);
 		});
 
 		// Get API of Instructor Collection
 		app.get("/instructor", async (req, res) => {
 			const result = await instructorCollection.find().toArray();
-			res.send(result)
+			res.send(result);
 		});
 
 		// Send a ping to confirm a successful connection
