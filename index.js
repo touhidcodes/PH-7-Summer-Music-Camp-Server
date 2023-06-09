@@ -31,8 +31,20 @@ async function run() {
 		// Connect the client to the server	(optional starting in v4.7)
 		client.connect();
 
-		// Get API of Class Collection
-		app.get("/class", async (req, res) => {
+		// Get API of  Class Collection
+		app.get("/classes", async (req, res) => {
+			const result = await classCollection.find().toArray();
+			res.send(result);
+		});
+
+		// Get API of Instructor Collection
+		app.get("/instructors", async (req, res) => {
+			const result = await instructorCollection.find().toArray();
+			res.send(result);
+		});
+
+		// Get API of 6 Class Collection
+		app.get("/home/classes", async (req, res) => {
 			const limit = 6;
 			const query = { enrolled: { $gt: 0 } };
 			const options = {
@@ -47,9 +59,19 @@ async function run() {
 			res.send(result);
 		});
 
-		// Get API of Instructor Collection
-		app.get("/instructor", async (req, res) => {
-			const result = await instructorCollection.find().toArray();
+		// Get API of 6 Instructor Collection
+		app.get("/home/instructors", async (req, res) => {
+			const limit = 6;
+			const query = { students_enrolled: { $gt: 0 } };
+			const options = {
+				sort: {
+					students_enrolled: -1,
+				},
+			};
+			const result = await instructorCollection
+				.find(query, options)
+				.limit(limit)
+				.toArray();
 			res.send(result);
 		});
 
