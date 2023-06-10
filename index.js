@@ -107,9 +107,26 @@ async function run() {
 		});
 
 		// Cart APIs
+		// Get API for Cart Data
+		app.get("/carts", async (req, res) => {
+			const email = req.query.email;
+			if (!email) {
+				res.send([]);
+			}
+			const query = { email: email };
+			const result = await cartCollection.find(query).toArray();
+			res.send(result);
+		});
+
 		// Post API for Cart Data
 		app.post("/carts", async (req, res) => {
 			const item = req.body;
+			const id = req.body.booked_id;
+			const query = { booked_id: id };
+			const existingCart = await cartCollection.findOne(query);
+			if (existingCart) {
+				return res.send({ message: "user already exists" });
+			}
 			const result = await cartCollection.insertOne(item);
 			res.send(result);
 		});
