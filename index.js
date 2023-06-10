@@ -25,6 +25,9 @@ const classCollection = client.db("MusicCampDB").collection("ClassCollection");
 const instructorCollection = client
 	.db("MusicCampDB")
 	.collection("InstructorCollection");
+const usersCollection = client
+	.db("MusicCampDB")
+	.collection("usersCollection");
 
 async function run() {
 	try {
@@ -90,6 +93,19 @@ async function run() {
 			const result = await instructorCollection.find(query).toArray();
 			res.send(result);
 		});
+
+		// Users APIs
+		// Post API for Users
+		 app.post("/users", async (req, res) => {
+				const user = req.body;
+				const query = { email: user.email };
+				const existingUser = await usersCollection.findOne(query);
+				if (existingUser) {
+					return res.send({ message: "user already exists" });
+				}
+				const result = await usersCollection.insertOne(user);
+				res.send(result);
+			});
 
 		// Send a ping to confirm a successful connection
 		await client.db("admin").command({ ping: 1 });
