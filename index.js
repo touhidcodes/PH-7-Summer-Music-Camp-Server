@@ -3,7 +3,7 @@ const app = express();
 const cors = require("cors");
 const port = process.env.PORT || 5000;
 require("dotenv").config();
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 
 // Middleware
 app.use(cors());
@@ -72,6 +72,22 @@ async function run() {
 				.find(query, options)
 				.limit(limit)
 				.toArray();
+			res.send(result);
+		});
+
+		// Get API for Individual Classes by Id
+		app.get("/classes/:id", async (req, res) => {
+			const id = req.params.id;
+			const query = { _id: new ObjectId(id) };
+			const result = await classCollection.find(query).toArray();
+			res.send(result);
+		});
+
+		// Get API for Individual Classes by Id
+		app.get("/instructors/:id", async (req, res) => {
+			const id = req.params.id;
+			const query = { _id: new ObjectId(id) };
+			const result = await instructorCollection.find(query).toArray();
 			res.send(result);
 		});
 
