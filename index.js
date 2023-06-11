@@ -20,6 +20,7 @@ const verifyJWT = (req, res, next) => {
 	}
 	// bearer token
 	const token = authorization.split(" ")[1];
+	console.log(token);
 	jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
 		if (err) {
 			return res
@@ -171,12 +172,46 @@ async function run() {
 			res.send(result);
 		});
 
+		// Get API for check User
+		app.get("/users/:email", verifyJWT, async (req, res) => {
+			const email = req.params.email;
+
+			if (req.decoded.email !== email) {
+				res.send({ user: false });
+			}
+			const query = { email: email };
+			const user = await usersCollection.findOne(query);
+			const result = { admin: user };
+			console.log(result);
+			res.send(result);
+		});
+
+		// Get API for check Admin
+		app.get("/users/admin/:email", verifyJWT, async (req, res) => {
+			const email = req.params.email;
+
+			if (req.decoded.email !== email) {
+				res.send({ admin: false });
+			}
+			const query = { email: email };
+			const user = await usersCollection.findOne(query);
+			const result = { admin: user?.role === "Admin" };
+			console.log(result);
+			res.send(result);
+		});
+
 		// Cart APIs
 		// Get API for Cart Data
-		app.get("/carts", async (req, res) => {
+		app.get("/carts", verifyJWT, async (req, res) => {
 			const email = req.query.email;
 			if (!email) {
 				res.send([]);
+			}
+			const decodedEmail = req.decoded.email;
+			if (email !== decodedEmail) {
+				return res
+					.status(403)
+					.send({ error: true, message: "forbidden access" });
 			}
 			const query = { email: email };
 			const result = await cartCollection.find(query).toArray();
@@ -184,7 +219,7 @@ async function run() {
 		});
 
 		// Post API for Cart Data
-		app.post("/carts", async (req, res) => {
+		app.post("/carts", verifyJWT, async (req, res) => {
 			const item = req.body;
 			const id = req.body.booked_id;
 			const query = { booked_id: id };
@@ -197,7 +232,7 @@ async function run() {
 		});
 
 		// Delete API for Cart Data
-		app.delete("/carts/:id", async (req, res) => {
+		app.delete("/carts/:id", verifyJWT, async (req, res) => {
 			const id = req.params.id;
 			const query = { _id: new ObjectId(id) };
 			const result = await cartCollection.deleteOne(query);
