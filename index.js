@@ -94,6 +94,12 @@ async function run() {
 		});
 
 		// Users APIs
+		// Get API for Users
+		app.get("/users", async (req, res) => {
+			const result = await usersCollection.find().toArray();
+			res.send(result);
+		});
+
 		// Post API for Users
 		app.post("/users", async (req, res) => {
 			const user = req.body;
@@ -103,6 +109,20 @@ async function run() {
 				return res.send({ message: "user already exists" });
 			}
 			const result = await usersCollection.insertOne(user);
+			res.send(result);
+		});
+
+		// Patch API for User Data Update Role as Admin
+		app.patch("/users/admin/:id", async (req, res) => {
+			const id = req.params.id;
+			console.log(id);
+			const filter = { _id: new ObjectId(id) };
+			const updateUser = {
+				$set: {
+					role: "admin",
+				},
+			};
+			const result = await usersCollection.updateOne(filter, updateUser);
 			res.send(result);
 		});
 
@@ -132,12 +152,12 @@ async function run() {
 		});
 
 		// Delete API for Cart Data
-		  app.delete("/carts/:id", async (req, res) => {
-				const id = req.params.id;
-				const query = { _id: new ObjectId(id) };
-				const result = await cartCollection.deleteOne(query);
-				res.send(result);
-			});
+		app.delete("/carts/:id", async (req, res) => {
+			const id = req.params.id;
+			const query = { _id: new ObjectId(id) };
+			const result = await cartCollection.deleteOne(query);
+			res.send(result);
+		});
 
 		// Send a ping to confirm a successful connection
 		await client.db("admin").command({ ping: 1 });
