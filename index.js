@@ -64,6 +64,19 @@ async function run() {
 			res.send({ token });
 		});
 
+		// Verify Admin API
+		const verifyAdmin = async (req, res, next) => {
+			const email = req.decoded.email;
+			const query = { email: email };
+			const user = await usersCollection.findOne(query);
+			if (user?.role !== "Admin") {
+				return res
+					.status(403)
+					.send({ error: true, message: "forbidden message" });
+			}
+			next();
+		};
+
 		// Get API of  Class Collection
 		app.get("/classes/all", async (req, res) => {
 			const result = await classCollection.find().toArray();
@@ -151,7 +164,7 @@ async function run() {
 
 		// Users APIs
 		// Get API for Users
-		app.get("/users", async (req, res) => {
+		app.get("/users", verifyJWT, verifyAdmin, async (req, res) => {
 			const result = await usersCollection.find().toArray();
 			res.send(result);
 		});
