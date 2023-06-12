@@ -124,6 +124,12 @@ async function run() {
 			res.send(result);
 		});
 
+		app.post("/class", verifyJWT, async (req, res) => {
+			const newItem = req.body;
+			const result = await classCollection.insertOne(newItem);
+			res.send(result);
+		});
+
 		// Users APIs
 		// Get API for Users
 		app.get("/users", async (req, res) => {
@@ -152,7 +158,7 @@ async function run() {
 			const query = { email: email };
 			const user = await usersCollection.findOne(query);
 			const result = { instructor: user?.role === "Instructor" };
-		
+
 			res.send(result);
 		});
 
