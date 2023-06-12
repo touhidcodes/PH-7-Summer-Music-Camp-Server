@@ -20,7 +20,6 @@ const verifyJWT = (req, res, next) => {
 	}
 	// bearer token
 	const token = authorization.split(" ")[1];
-	console.log(token);
 	jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
 		if (err) {
 			return res
@@ -132,6 +131,31 @@ async function run() {
 			res.send(result);
 		});
 
+		// Get API for check Role for Admin
+		app.get("/users/admin/:email", verifyJWT, async (req, res) => {
+			const email = req.params.email;
+			if (req.decoded.email !== email) {
+				res.send({ admin: false });
+			}
+			const query = { email: email };
+			const user = await usersCollection.findOne(query);
+			const result = { admin: user?.role === "Admin" };
+			res.send(result);
+		});
+
+		// Get API for check Role for Instructor
+		app.get("/users/instructor/:email", verifyJWT, async (req, res) => {
+			const email = req.params.email;
+			if (req.decoded.email !== email) {
+				res.send({ instructor: false });
+			}
+			const query = { email: email };
+			const user = await usersCollection.findOne(query);
+			const result = { instructor: user?.role === "Instructor" };
+		
+			res.send(result);
+		});
+
 		// Post API for Users
 		app.post("/users", async (req, res) => {
 			const user = req.body;
@@ -147,7 +171,6 @@ async function run() {
 		// Patch API for User Data Update Role as Admin
 		app.patch("/users/admin/:id", async (req, res) => {
 			const id = req.params.id;
-			console.log(id);
 			const filter = { _id: new ObjectId(id) };
 			const updateUser = {
 				$set: {
@@ -159,9 +182,8 @@ async function run() {
 		});
 
 		// Patch API for User Data Update Role as Instructor
-		app.patch("/users/instructor/:id", async (req, res) => {
+		app.patch("/users/Instructor/:id", async (req, res) => {
 			const id = req.params.id;
-			console.log(id);
 			const filter = { _id: new ObjectId(id) };
 			const updateUser = {
 				$set: {
@@ -169,34 +191,6 @@ async function run() {
 				},
 			};
 			const result = await usersCollection.updateOne(filter, updateUser);
-			res.send(result);
-		});
-
-		// Get API for check User
-		app.get("/users/:email", verifyJWT, async (req, res) => {
-			const email = req.params.email;
-
-			if (req.decoded.email !== email) {
-				res.send({ user: false });
-			}
-			const query = { email: email };
-			const user = await usersCollection.findOne(query);
-			const result = { admin: user };
-			console.log(result);
-			res.send(result);
-		});
-
-		// Get API for check Admin
-		app.get("/users/admin/:email", verifyJWT, async (req, res) => {
-			const email = req.params.email;
-
-			if (req.decoded.email !== email) {
-				res.send({ admin: false });
-			}
-			const query = { email: email };
-			const user = await usersCollection.findOne(query);
-			const result = { admin: user?.role === "Admin" };
-			console.log(result);
 			res.send(result);
 		});
 
@@ -219,13 +213,13 @@ async function run() {
 		});
 
 		// Post API for Cart Data
-		app.post("/carts", verifyJWT, async (req, res) => {
+		app.post("/carts", async (req, res) => {
 			const item = req.body;
 			const id = req.body.booked_id;
 			const query = { booked_id: id };
 			const existingCart = await cartCollection.findOne(query);
 			if (existingCart) {
-				return res.send({ message: "user already exists" });
+				return res.send({ message: "cart already exists" });
 			}
 			const result = await cartCollection.insertOne(item);
 			res.send(result);
