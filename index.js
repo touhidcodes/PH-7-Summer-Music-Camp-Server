@@ -246,6 +246,21 @@ async function run() {
 			res.send(result);
 		});
 
+		// Patch API for Class Feedback Status as Admin
+		app.patch("/feedback/:id", async (req, res) => {
+			const id = req.params.id;
+			const body = req.body;
+			const filter = { _id: new ObjectId(id) };
+			const updateUser = {
+				$set: {
+					feedback: body,
+				},
+			};
+			const result = await classCollection.updateOne(filter, updateUser);
+			console.log(result);
+			res.send(result);
+		});
+
 		// Cart APIs
 		// Get API for Cart Data
 		app.get("/carts", verifyJWT, async (req, res) => {
