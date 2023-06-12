@@ -119,7 +119,7 @@ async function run() {
 		// Get API for Individual Classes by Email
 		app.get("/classes", verifyJWT, async (req, res) => {
 			const email = req.query.email;
-			console.log(email)
+			console.log(email);
 			if (!email) {
 				res.send([]);
 			}
@@ -177,7 +177,6 @@ async function run() {
 			const query = { email: email };
 			const user = await usersCollection.findOne(query);
 			const result = { instructor: user?.role === "Instructor" };
-
 			res.send(result);
 		});
 
@@ -216,6 +215,34 @@ async function run() {
 				},
 			};
 			const result = await usersCollection.updateOne(filter, updateUser);
+			res.send(result);
+		});
+
+		// Patch API for Class Approve Status as Admin
+		app.patch("/approve/:id", async (req, res) => {
+			const id = req.params.id;
+			const filter = { _id: new ObjectId(id) };
+			const updateUser = {
+				$set: {
+					status: "Approved",
+				},
+			};
+			const result = await classCollection.updateOne(filter, updateUser);
+			console.log(result);
+			res.send(result);
+		});
+
+		// Patch API for Class Deny Status as Admin
+		app.patch("/deny/:id", async (req, res) => {
+			const id = req.params.id;
+			const filter = { _id: new ObjectId(id) };
+			const updateUser = {
+				$set: {
+					status: "Deny",
+				},
+			};
+			const result = await classCollection.updateOne(filter, updateUser);
+			console.log(result);
 			res.send(result);
 		});
 
