@@ -65,7 +65,7 @@ async function run() {
 		});
 
 		// Get API of  Class Collection
-		app.get("/classes", async (req, res) => {
+		app.get("/classes/all", async (req, res) => {
 			const result = await classCollection.find().toArray();
 			res.send(result);
 		});
@@ -116,7 +116,25 @@ async function run() {
 			res.send(result);
 		});
 
-		// Get API for Individual Classes by Id
+		// Get API for Individual Classes by Email
+		app.get("/classes", verifyJWT, async (req, res) => {
+			const email = req.query.email;
+			console.log(email)
+			if (!email) {
+				res.send([]);
+			}
+			const decodedEmail = req.decoded.email;
+			if (email !== decodedEmail) {
+				return res
+					.status(403)
+					.send({ error: true, message: "forbidden access" });
+			}
+			const query = { email: email };
+			const result = await classCollection.find(query).toArray();
+			res.send(result);
+		});
+
+		// Get API for Individual Instructors by Id
 		app.get("/instructors/:id", async (req, res) => {
 			const id = req.params.id;
 			const query = { _id: new ObjectId(id) };
@@ -124,6 +142,7 @@ async function run() {
 			res.send(result);
 		});
 
+		// Post API of Add Class
 		app.post("/class", verifyJWT, async (req, res) => {
 			const newItem = req.body;
 			const result = await classCollection.insertOne(newItem);
@@ -215,6 +234,23 @@ async function run() {
 			}
 			const query = { email: email };
 			const result = await cartCollection.find(query).toArray();
+			res.send(result);
+		});
+
+		// Get API for Cart Data for pending
+		app.get("/pending", verifyJWT, async (req, res) => {
+			const email = req.query.email;
+			if (!email) {
+				res.send([]);
+			}
+			const decodedEmail = req.decoded.email;
+			if (email !== decodedEmail) {
+				return res
+					.status(403)
+					.send({ error: true, message: "forbidden access" });
+			}
+			const query = { status: "pending" };
+			const result = await classCollection.find(query).toArray();
 			res.send(result);
 		});
 
